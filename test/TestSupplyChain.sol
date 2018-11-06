@@ -93,7 +93,7 @@ contract TestSupplyChain {
   // Test Seller can't ship an item that is not sold
   function testShipNotSold() public
   {
-    bool result = selleraddress.markItemShipped(1);
+    bool result = selleraddress.markItemShipped(0);
     Assert.isFalse(result, "ShipNotSold failed to throw exception");
     fetchItem(1);
     Assert.equal(0, state, 'State should still be 0 (ForSale)');
@@ -107,7 +107,7 @@ contract TestSupplyChain {
     // make sure buyer has either
     address(buyeraddress).transfer(20);
     // try to purchase for price-1
-    bool result = buyeraddress.createBuyerOffer(1, price-1);
+    bool result = buyeraddress.createBuyerOffer(0, price-1);
     // check details
     Assert.isFalse(result, "NotEnoughCash failed to throw exception");
     fetchItem(0);
@@ -136,14 +136,14 @@ contract TestSupplyChain {
   // Test non-seller trying to mark a sold Item as shipped
   function testShipNotSeller() public
   {
-    bool result = address(supplychain).call(abi.encodeWithSignature("shipItem(uint256)"), 2);
+    bool result = address(supplychain).call(abi.encodeWithSignature("shipItem(uint256)"), 0);
     Assert.isFalse(result, "ShipNotSeller failed to throw exception");
   }
 
   // Test Buyer trying to receive an item that is not yet shipped
   function testReceiveNotShipped() public
   {
-    bool result = buyeraddress.markItemReceived(1);
+    bool result = buyeraddress.markItemReceived(0);
     Assert.isFalse(result, "ShipNotSold failed to throw exception");
     fetchItem(1);
     Assert.equal(0, state, 'State should still be 0 (ForSale)');
@@ -161,7 +161,7 @@ contract TestSupplyChain {
   // Test non-buyer trying to mark a shipped Item as received
   function testReceiveNotBuyer() public
   {
-    bool result = address(supplychain).call(abi.encodeWithSignature("receiveItem(uint256)"), 2);
+    bool result = address(supplychain).call(abi.encodeWithSignature("receiveItem(uint256)"), 0);
     Assert.isFalse(result, "ReceiveNotBuyer failed to throw exception");
   }
 
