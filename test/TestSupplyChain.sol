@@ -4,20 +4,37 @@ import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/SupplyChain.sol";
 
+/* Contract to imitate external Seller */
 contract Seller {
+
+  // SupplyChain contract address
+  SupplyChain supplychain = SupplyChain(DeployedAddresses.SupplyChain());
+
   function addSellerItem(string _item, uint _price) public {
-    SupplyChain supplychain = SupplyChain(DeployedAddresses.SupplyChain());
     supplychain.addItem(_item, _price);
   }
+
+  function markItemShipped(uint _sku) public {
+    supplychain.shipItem(_sku);
+  }
+
   function() public payable {
   }
 }
 
+/* Contract to imitate external Seller */
 contract Buyer {
+
+  SupplyChain supplychain = SupplyChain(DeployedAddresses.SupplyChain());
+
   function createBuyerOffer(uint _sku, uint _price) public {
-    SupplyChain supplychain = SupplyChain(DeployedAddresses.SupplyChain());
     supplychain.buyItem.value(_price)(_sku);
   }
+
+  function markItemReceived(uint _sku) public {
+    supplychain.receiveItem(_sku);
+  }
+
   function() public payable {
   }
 }
@@ -27,11 +44,10 @@ contract TestSupplyChain {
   // give contract some ether
   uint public initialBalance = 10 ether;
 
+  // external contract addresses
   SupplyChain supplychain = SupplyChain(DeployedAddresses.SupplyChain());
   Seller selleraddress;
   Buyer buyeraddress;
-
-  enum State { ForSale, Sold, Shipped, Received }
 
   string name;
   uint sku;
@@ -82,7 +98,24 @@ contract TestSupplyChain {
     Assert.equal(1, state, 'Wrong State (not Sold)');
   }
 
+  // Test Seller marking Item shipped
+  function testShipItem() public
+  {
+    selleraddress.markItemShipped(0);
+    fetchItem(0);
+    Assert.equal(2, state, 'Wrong State (not Shipped)');
+  }
 
+  // Test Buyer marking Item received
+  function testReceiveItem() public
+  {
+    buyeraddress.markItemReceived(0);
+    fetchItem(0);
+    Assert.equal(3, state, 'Wrong State (not Received)');
+  }
+
+  /* We've tested cases that should work, still need to test for failures */
+  /* (which is a pain in the butt in Solidity)                            */
 
     // buyItem
 
