@@ -10,14 +10,17 @@ contract Seller {
   // SupplyChain contract address
   SupplyChain supplychain = SupplyChain(DeployedAddresses.SupplyChain());
 
+  // return false on exception
   function addSellerItem(string _item, uint _price) public {
     supplychain.addItem(_item, _price);
   }
 
+  // return false on exception
   function markItemShipped(uint _sku) public returns (bool) {
     return address(supplychain).call(abi.encodeWithSignature("shipItem(uint256)"), _sku);
   }
 
+  // accept Ether
   function() public payable {
   }
 }
